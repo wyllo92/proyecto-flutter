@@ -95,6 +95,18 @@ class _HomePageState extends State<HomePage> {
     ),
   ];
 
+  // Mapeo de nombre de lenguaje a nombre de archivo de imagen
+  static const Map<String, String> languageImages = {
+    'Python': 'python.jpg',
+    'Java': 'java.jpg',
+    'JavaScript': 'js.jpg',
+    'C#': 'c#.jpg',
+    'Go': 'go.jpg',
+    'Rust': 'rust.jpg',
+    'Kotlin': 'kotlin.jpg',
+    'Dart': 'dart.jpg',
+  };
+
   @override
   Widget build(BuildContext context) {
     final title = _current == HomeView.lista
@@ -106,7 +118,6 @@ class _HomePageState extends State<HomePage> {
         title: Text(title),
         centerTitle: true,
         elevation: 0,
-        // AppBar personalizado con gradiente
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -134,37 +145,47 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      // NavigationDrawer (Material 3) dentro del Drawer del Scaffold
       drawer: Drawer(
-        child: SafeArea(
-          child: NavigationDrawer(
-            selectedIndex: _current == HomeView.lista ? 0 : 1,
-            onDestinationSelected: (index) {
-              Navigator.of(context).pop(); // cierra el drawer
-              setState(() {
-                _current = index == 0 ? HomeView.lista : HomeView.tarjetas;
-              });
-            },
-            children: const [
-              Padding(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: Text(
-                  'Navegación',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.indigo,
+                image: DecorationImage(
+                  image: AssetImage('assets/img/lenguajes.png'),
+                  fit: BoxFit.cover,
+                  opacity: 0.2,
                 ),
               ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.list_alt_outlined),
-                selectedIcon: Icon(Icons.list_alt),
-                label: Text('Ver como lista'),
+              child: Text(
+                'Lenguajes de Programación',
+                style: TextStyle(color: Colors.white, fontSize: 20),
               ),
-              NavigationDrawerDestination(
-                icon: Icon(Icons.grid_view_outlined),
-                selectedIcon: Icon(Icons.grid_view),
-                label: Text('Ver como tarjetas'),
-              ),
-            ],
-          ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.list_alt_outlined),
+              title: const Text('Ver como lista'),
+              selected: _current == HomeView.lista,
+              onTap: () {
+                setState(() {
+                  _current = HomeView.lista;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.grid_view_outlined),
+              title: const Text('Ver como tarjetas'),
+              selected: _current == HomeView.tarjetas,
+              onTap: () {
+                setState(() {
+                  _current = HomeView.tarjetas;
+                });
+                Navigator.pop(context);
+              },
+            ),
+          ],
         ),
       ),
 
@@ -218,48 +239,39 @@ class _HomePageState extends State<HomePage> {
       itemCount: languages.length,
       itemBuilder: (context, i) {
         final lang = languages[i];
+        final imgFile = languageImages[lang.name] ?? 'lenguajes.png';
         return Card(
           elevation: 1,
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          child: InkWell(
-            onTap: () => _showSnack(context, 'Elegiste ${lang.name}'),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(lang.icon, size: 28),
-                  const SizedBox(height: 12),
-                  Text(
-                    lang.name,
-                    style: Theme.of(context).textTheme.titleMedium,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Image(
+                image: AssetImage('assets/img/$imgFile'),
+                height: 80,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+              ListTile(
+                leading: Icon(lang.icon),
+                title: Text(lang.name),
+                subtitle: Text('Año: ${lang.year}\nCreador: ${lang.creator}'),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () => _showSnack(context, 'Más de ${lang.name}'),
+                    child: const Text('Ver más'),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Año: ${lang.year}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  Text(
-                    'Creador: ${lang.creator}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: FilledButton.tonal(
-                      onPressed: () =>
-                          _showSnack(context, 'Más de ${lang.name}'),
-                      child: const Text('Ver más'),
-                    ),
-                  ),
+                  const SizedBox(width: 8),
                 ],
               ),
-            ),
+            ],
           ),
         );
       },
